@@ -8,7 +8,7 @@ export default function ContactPage() {
   const { t } = usePreferences();
 
   return (
-    <section className="page-section" style={{ maxWidth: 700 }}>
+    <section className="page-section">
       <span className="section-eyebrow">{t("getInTouch")}</span>
       <h1 className="section-title" style={{ marginBottom: "1rem" }}>{t("contactTitle")}</h1>
       <p style={{ color: "var(--muted)", marginBottom: "2.5rem" }}>{t("contactSubtitle")}</p>
@@ -20,7 +20,7 @@ export default function ContactPage() {
             e.preventDefault();
             setDone(true);
           }}
-          style={{ display: "flex", flexDirection: "column", gap: "1.2rem" }}
+          style={{ display: "flex", flexDirection: "column", gap: "1.2rem", maxWidth: 520 }}
         >
           <input required placeholder={t("fullName")} className="field-input" />
           <input required type="email" placeholder={t("email")} className="field-input" />

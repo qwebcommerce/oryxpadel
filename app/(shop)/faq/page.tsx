@@ -6,7 +6,7 @@ import { loc, theme } from "@/theme.config";
 export default function FaqPage() {
   const { t, locale } = usePreferences();
   return (
-    <section className="page-section" style={{ maxWidth: 800 }}>
+    <section className="page-section">
       <span className="section-eyebrow">{t("help")}</span>
       <h1 className="section-title" style={{ marginBottom: "2rem" }}>{t("faqTitle")}</h1>
       {theme.faqs.map((item) => (

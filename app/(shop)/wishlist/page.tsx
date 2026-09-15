@@ -45,7 +45,7 @@ export default function WishlistPage() {
   }
 
   return (
-    <section className="page-section" style={{ maxWidth: 1400 }}>
+    <section className="page-section">
       <div className="wishlist-head">
         <div>
           <span className="section-eyebrow">{t("savedItems")}</span>

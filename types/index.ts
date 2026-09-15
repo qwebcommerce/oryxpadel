@@ -154,7 +154,7 @@ export type NewsletterEntry = {
 export type ProductFilters = {
   category?: string;
   q?: string;
-  sort?: "newest" | "price-asc" | "price-desc" | "name";
+  sort?: "newest" | "oldest" | "price-asc" | "price-desc" | "name" | "name-desc";
   status?: ProductStatus;
 };
 

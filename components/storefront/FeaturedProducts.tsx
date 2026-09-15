@@ -1,51 +1,91 @@
 "use client";
 
-import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useRef, type MouseEvent, type PointerEvent } from "react";
 import ProductCard from "@/components/storefront/ProductCard";
-import { categoryLabel } from "@/lib/i18n";
-import { usePreferences } from "@/lib/preferences";
 import type { Product } from "@/types";
 
 export default function FeaturedProducts({ products }: { products: Product[] }) {
-  const { t, locale } = usePreferences();
-  const groups = useMemo(() => {
-    const unique = Array.from(new Map(products.map((p) => [p.categorySlug, p.category])).entries());
-    return unique;
-  }, [products]);
-  const [active, setActive] = useState("all");
-  const visible = active === "all" ? products : products.filter((p) => p.categorySlug === active);
+  const visible = products.slice(0, 8);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const drag = useRef({
+    pointerId: -1,
+    active: false,
+    moved: false,
+    startX: 0,
+    startScroll: 0,
+  });
+
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    const onWheel = (event: WheelEvent) => {
+      if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+      if (el.scrollWidth <= el.clientWidth) return;
+      el.scrollLeft += event.deltaY;
+      event.preventDefault();
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, []);
+
+  if (!visible.length) return null;
+
+  function onPointerDown(event: PointerEvent<HTMLDivElement>) {
+    if (event.pointerType !== "mouse" || event.button !== 0) return;
+    const target = event.target as HTMLElement | null;
+    if (target?.closest("button, a, input, select, textarea, label")) return;
+    const el = trackRef.current;
+    if (!el) return;
+    drag.current = {
+      pointerId: event.pointerId,
+      active: true,
+      moved: false,
+      startX: event.clientX,
+      startScroll: el.scrollLeft,
+    };
+    el.setPointerCapture(event.pointerId);
+    el.classList.add("is-dragging");
+  }
+
+  function onPointerMove(event: PointerEvent<HTMLDivElement>) {
+    const state = drag.current;
+    const el = trackRef.current;
+    if (!state.active || !el || event.pointerId !== state.pointerId) return;
+    const dx = event.clientX - state.startX;
+    if (Math.abs(dx) > 6) state.moved = true;
+    el.scrollLeft = state.startScroll - dx;
+  }
+
+  function endDrag(event: PointerEvent<HTMLDivElement>) {
+    const el = trackRef.current;
+    const state = drag.current;
+    if (!state.active || event.pointerId !== state.pointerId) return;
+    state.active = false;
+    el?.classList.remove("is-dragging");
+    if (el?.hasPointerCapture(event.pointerId)) el.releasePointerCapture(event.pointerId);
+  }
+
+  function onClickCapture(event: MouseEvent<HTMLDivElement>) {
+    if (!drag.current.moved) return;
+    event.preventDefault();
+    event.stopPropagation();
+    drag.current.moved = false;
+  }
 
   return (
-    <section style={{ backgroundColor: "var(--warm-white)", padding: "6rem 1.5rem" }}>
-      <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
-        <div style={{ marginBottom: "3rem" }}>
-          <span className="section-eyebrow">{t("topPicks")}</span>
-          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap", gap: "1.5rem" }}>
-            <h2 className="section-title" style={{ color: "var(--black)" }}>{t("bestSellers")}</h2>
-            <p style={{ color: "var(--muted)", fontSize: "0.82rem" }}>
-              {visible.length} {visible.length === 1 ? t("item") : t("items")}
-            </p>
-          </div>
-        </div>
-        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "2.5rem", borderBottom: "1px solid var(--sand)", paddingBottom: "2rem" }}>
-          <button onClick={() => setActive("all")} className={`filter-tab${active === "all" ? " active" : ""}`}>{t("all")}</button>
-          {groups.map(([slug, name]) => (
-            <button key={slug} onClick={() => setActive(slug)} className={`filter-tab${active === slug ? " active" : ""}`}>
-              {categoryLabel(locale, slug, name)}
-            </button>
-          ))}
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-5 gap-y-10">
-          {visible.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-        <div style={{ textAlign: "center", marginTop: "4rem" }}>
-          <Link href={active === "all" ? "/shop" : `/shop/${visible[0]?.categorySlug ?? "all"}`} className="btn-outline-black">
-            {active === "all" ? t("viewAllProducts") : `${t("viewAll")} ${categoryLabel(locale, active, visible[0]?.category ?? "")}`}
-          </Link>
-        </div>
+    <section className="featured-carousel">
+      <div
+        ref={trackRef}
+        className="featured-carousel__track"
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        onClickCapture={onClickCapture}
+      >
+        {visible.map((product) => (
+          <ProductCard key={product.id} product={product} />
+        ))}
       </div>
     </section>
   );

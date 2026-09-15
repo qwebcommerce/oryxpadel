@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
 import { logoutCustomerAction } from "@/lib/actions";
 import { usePreferences } from "@/lib/preferences";
 
@@ -11,11 +11,11 @@ export type StoreCustomer = {
 };
 
 function initials(name: string, email: string) {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
+  const parts = (name ?? "").trim().split(/\s+/).filter(Boolean);
   if (parts.length >= 2) {
     return `${parts[0][0] ?? ""}${parts[1][0] ?? ""}`.toUpperCase();
   }
-  const letter = parts[0]?.[0] || email.trim()[0] || "U";
+  const letter = parts[0]?.[0] || (email ?? "").trim()[0] || "U";
   return letter.toUpperCase();
 }
 
@@ -27,24 +27,17 @@ export default function AccountMenu({
   color: string;
 }) {
   const { t } = usePreferences();
-  const [open, setOpen] = useState(false);
-  const root = useRef<HTMLDivElement>(null);
+  const root = useRef<HTMLDetailsElement>(null);
 
   useEffect(() => {
-    if (!open) return;
     const onPointer = (event: PointerEvent) => {
-      if (!root.current?.contains(event.target as Node)) setOpen(false);
-    };
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
+      const el = root.current;
+      if (!el?.open) return;
+      if (!el.contains(event.target as Node)) el.open = false;
     };
     document.addEventListener("pointerdown", onPointer);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("pointerdown", onPointer);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
+    return () => document.removeEventListener("pointerdown", onPointer);
+  }, []);
 
   if (!customer) {
     return (
@@ -55,37 +48,32 @@ export default function AccountMenu({
   }
 
   return (
-    <div className="admin-avatar nav-avatar" ref={root}>
-      <button
-        type="button"
+    <details className="admin-avatar nav-avatar" ref={root}>
+      <summary
         className="admin-avatar__btn"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        onClick={() => setOpen((value) => !value)}
         title={customer.fullName || customer.email}
+        aria-label={customer.fullName || customer.email}
       >
         {initials(customer.fullName, customer.email)}
-      </button>
-      {open ? (
-        <div className="admin-avatar__menu" role="menu">
-          <p className="admin-avatar__email">{customer.email}</p>
-          <Link href="/account" role="menuitem" onClick={() => setOpen(false)}>
-            {t("dashboard")}
-          </Link>
-          <Link href="/account/orders" role="menuitem" onClick={() => setOpen(false)}>
-            {t("ordersNav")}
-          </Link>
-          <Link href="/account/profile" role="menuitem" onClick={() => setOpen(false)}>
-            {t("profileNav")}
-          </Link>
-          <form action={logoutCustomerAction}>
-            <button type="submit" role="menuitem">
-              {t("logOut")}
-            </button>
-          </form>
-        </div>
-      ) : null}
-    </div>
+      </summary>
+      <div className="admin-avatar__menu" role="menu">
+        <p className="admin-avatar__email">{customer.email}</p>
+        <Link href="/account" role="menuitem">
+          {t("dashboard")}
+        </Link>
+        <Link href="/account/orders" role="menuitem">
+          {t("ordersNav")}
+        </Link>
+        <Link href="/account/profile" role="menuitem">
+          {t("profileNav")}
+        </Link>
+        <form action={logoutCustomerAction}>
+          <button type="submit" role="menuitem">
+            {t("logOut")}
+          </button>
+        </form>
+      </div>
+    </details>
   );
 }
 
@@ -107,12 +95,13 @@ function NavIcon({
     color,
     padding: "4px",
     position: "relative",
+    zIndex: 3,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
   };
   return (
-    <Link href={href} title={title} aria-label={title} style={style}>
+    <Link href={href} title={title} aria-label={title} className="header-icon-btn" style={style}>
       {children}
     </Link>
   );

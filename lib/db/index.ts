@@ -1,5 +1,6 @@
 import "server-only";
 import * as supabaseStore from "@/lib/db/supabase-store";
+import { DEFAULT_STORE_SETTINGS } from "@/lib/format";
 import type {
   Category,
   CategoryInput,
@@ -18,8 +19,12 @@ import type {
   StoreSettings,
 } from "@/types";
 
+function emptyOnMissingTable<T>(fallback: T) {
+  return (): T => fallback;
+}
+
 export async function listProducts(filters?: ProductFilters): Promise<Product[]> {
-  return supabaseStore.listProducts(filters);
+  return supabaseStore.listProducts(filters).catch(emptyOnMissingTable([]));
 }
 
 export async function listAllProducts(): Promise<Product[]> {
@@ -47,7 +52,7 @@ export async function deleteProduct(id: string): Promise<void> {
 }
 
 export async function listCategories(): Promise<Category[]> {
-  return supabaseStore.listCategories();
+  return supabaseStore.listCategories().catch(emptyOnMissingTable([]));
 }
 
 export async function getCategoryById(id: string): Promise<Category | null> {
@@ -125,7 +130,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
 }
 
 export async function getStoreSettings(): Promise<StoreSettings> {
-  return supabaseStore.getStoreSettings();
+  return supabaseStore.getStoreSettings().catch(emptyOnMissingTable(DEFAULT_STORE_SETTINGS));
 }
 
 export async function updateStoreSettings(input: StoreSettings): Promise<StoreSettings> {

@@ -2,79 +2,39 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef } from "react";
 import { nestCategories, localizedCategoryName } from "@/lib/categories";
 import { usePreferences } from "@/lib/preferences";
 import type { Category } from "@/types";
 
-export default function CollectionsMenu({
-  color,
-  open,
-  onOpen,
-  onToggle,
-}: {
-  color: string;
-  open: boolean;
-  onOpen: () => void;
-  onClose?: () => void;
-  onToggle: () => void;
-}) {
+export default function CollectionsMenu({ color }: { color: string }) {
   const { t } = usePreferences();
+  const pathname = usePathname();
+  const active = pathname === "/shop" || pathname.startsWith("/shop/");
   return (
-    <button
-      type="button"
-      className={`nav-link nav-mega-trigger${open ? " is-open" : ""}`}
+    <Link
+      href="/shop"
+      className={`nav-link nav-mega-trigger${active ? " is-active" : ""}`}
       style={{ color }}
-      aria-expanded={open}
       aria-haspopup="true"
       aria-controls="collections-menu"
-      onClick={onToggle}
-      onMouseEnter={onOpen}
     >
-      {t("collections")}
+      {t("categories")}
       <ChevronDown />
-    </button>
+    </Link>
   );
 }
 
-export function CollectionsPanel({
-  categories,
-  open,
-  onOpen,
-  onClose,
-}: {
-  categories: Category[];
-  open: boolean;
-  onOpen: () => void;
-  onClose: () => void;
-}) {
+export function CollectionsPanel({ categories }: { categories: Category[] }) {
   const { t, locale } = usePreferences();
-  const pathname = usePathname();
   const tree = nestCategories(categories);
-  const closeOnRoute = useRef(pathname);
-
-  useEffect(() => {
-    if (closeOnRoute.current === pathname) return;
-    closeOnRoute.current = pathname;
-    onClose();
-  }, [pathname, onClose]);
-
-  if (!open) return null;
 
   return (
-    <div className="mega-layer">
-      <button type="button" className="mega-backdrop" aria-label={t("close")} onClick={onClose} />
-      <div
-        id="collections-menu"
-        className="mega-panel"
-        onMouseEnter={onOpen}
-        role="menu"
-        aria-label={t("collections")}
-      >
+    <div className="mega-layer" id="collections-menu" role="menu" aria-label={t("categories")}>
+      <div className="mega-panel">
         <div className="mega-panel__inner">
           <div className="mega-panel__head">
             <p>{t("shopByCategory")}</p>
-            <Link href="/shop" className="mega-panel__all" onClick={onClose}>
+            <Link href="/shop" className="mega-panel__all">
               {t("viewAllProducts")}
             </Link>
           </div>
@@ -84,14 +44,14 @@ export function CollectionsPanel({
             <div className="mega-grid">
               {tree.map((category) => (
                 <div key={category.id} className="mega-col">
-                  <Link href={`/shop/${category.slug}`} className="mega-col__title" onClick={onClose}>
+                  <Link href={`/shop/${category.slug}`} className="mega-col__title">
                     {localizedCategoryName(category, locale)}
                   </Link>
                   {category.children.length > 0 ? (
                     <ul className="mega-col__subs">
                       {category.children.map((child) => (
                         <li key={child.id}>
-                          <Link href={`/shop/${child.slug}`} onClick={onClose}>
+                          <Link href={`/shop/${child.slug}`}>
                             {localizedCategoryName(child, locale)}
                           </Link>
                         </li>

@@ -14,7 +14,7 @@ export default function SearchModal() {
   if (!searchOpen) return null;
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 1100, background: "color-mix(in srgb, var(--warm-white) 97%, transparent)", color: "var(--black)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "8rem 1.5rem" }}>
+    <div style={{ position: "fixed", inset: 0, zIndex: 1100, background: "color-mix(in srgb, var(--warm-white) 97%, transparent)", color: "var(--black)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "4rem 1.5rem" }}>
       <form
         onSubmit={(e) => {
           e.preventDefault();

@@ -19,7 +19,7 @@ export default function CartDrawer() {
       <button aria-label={t("close")} onClick={() => setCartOpen(false)} style={{ position: "absolute", inset: 0, background: "rgba(13,13,13,0.45)", border: "none" }} />
       <aside style={{ position: "absolute", top: 0, insetInlineEnd: 0, bottom: 0, width: "min(420px, 100%)", background: "var(--warm-white)", color: "var(--black)", display: "flex", flexDirection: "column", padding: "1.5rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
-          <h2 style={{ fontSize: "1.1rem", fontWeight: 900, letterSpacing: "0.16em" }}>{t("yourBag")}</h2>
+          <h2 style={{ fontSize: "1.35rem", fontWeight: 400, fontFamily: "var(--font-body), serif" }}>{t("yourBag")}</h2>
           <button onClick={() => setCartOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "1.4rem" }}>×</button>
         </div>
         <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: "1.25rem" }}>

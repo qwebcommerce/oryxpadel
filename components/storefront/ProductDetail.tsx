@@ -2,25 +2,20 @@
 
 import { useEffect, useMemo, useState } from "react";
 import ProductCard from "@/components/storefront/ProductCard";
-import { categoryLabel } from "@/lib/i18n";
 import { formatQar } from "@/lib/format";
 import { bilingualCopy, findVariant } from "@/lib/products";
 import { usePreferences } from "@/lib/preferences";
-import { useCart, useWishlist } from "@/lib/store";
+import { useCart, useUi, useWishlist } from "@/lib/store";
 import { useToast } from "@/lib/toast";
 import type { Product } from "@/types";
 
 export default function ProductDetail({ product, related }: { product: Product; related: Product[] }) {
   const { add } = useCart();
+  const { setCartOpen } = useUi();
   const toast = useToast();
   const { toggle, has } = useWishlist();
   const { t, locale } = usePreferences();
   const title = bilingualCopy(product.name, product.nameAr, locale);
-  const category = bilingualCopy(
-    categoryLabel("en", product.categorySlug, product.category),
-    categoryLabel("ar", product.categorySlug, product.category),
-    locale,
-  );
   const name = title.primary;
   const [size, setSize] = useState(product.sizes[0] ?? "");
   const [color, setColor] = useState(product.colors[0] ?? "");
@@ -43,16 +38,23 @@ export default function ProductDetail({ product, related }: { product: Product; 
 
   function addToBag() {
     if (stock <= 0) return;
-    add(product, { size, color, quantity: qty, variantId: variant?.id });
+    add(product, { size, color, quantity: qty });
     toast.success(t("toastAddedToBag"), name);
+    setCartOpen(true);
+  }
+
+  function toggleFavorite() {
+    const next = !saved;
+    toggle(product.id);
+    toast.success(next ? t("savedToWishlist") : t("removedFromWishlist"), name);
   }
 
   return (
     <section className="page-section product-page">
       <div className="product-detail">
         <div>
-          <div className="img-zoom" style={{ background: "var(--sand)", aspectRatio: "3/4" }}>
-            <img src={image} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          <div className="img-zoom" style={{ background: "var(--surface)", aspectRatio: "1 / 1.25" }}>
+            <img src={image} alt={name} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
           </div>
           {gallery.length > 1 && (
             <div style={{ display: "flex", gap: "0.6rem", marginTop: "0.75rem" }}>
@@ -65,14 +67,6 @@ export default function ProductDetail({ product, related }: { product: Product; 
           )}
         </div>
         <div>
-          <p className="product-detail__kicker">
-            <span dir={category.primaryDir}>{category.primary}</span>
-            {category.secondary ? (
-              <span dir={category.secondaryDir} lang={category.secondaryDir === "rtl" ? "ar" : undefined}>
-                {category.secondary}
-              </span>
-            ) : null}
-          </p>
           <h1 className="product-detail__title" dir={title.primaryDir} lang={title.primaryDir === "rtl" ? "ar" : undefined}>
             {title.primary}
           </h1>
@@ -123,7 +117,7 @@ export default function ProductDetail({ product, related }: { product: Product; 
           >
             {stock <= 0 ? t("outOfStock") : t("addToBag")}
           </button>
-          <button type="button" className="btn-outline-black" style={{ width: "100%" }} onClick={() => toggle(product.id)}>
+          <button type="button" className="btn-outline-black" style={{ width: "100%" }} onClick={toggleFavorite}>
             {saved ? t("savedToWishlist") : t("addToWishlist")}
           </button>
           <div style={{ marginTop: "2rem", borderTop: "1px solid var(--sand)", paddingTop: "2rem", color: "var(--muted)", lineHeight: 1.85 }}>
@@ -145,8 +139,10 @@ export default function ProductDetail({ product, related }: { product: Product; 
       </div>
       {related.length > 0 && (
         <div style={{ marginTop: "5rem", borderTop: "1px solid var(--sand)", paddingTop: "4rem" }}>
-          <span className="section-eyebrow">{t("youMayAlsoLike")}</span>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5" style={{ marginTop: "2rem" }}>
+          <h3 className="related-title">
+            <em>{t("youMayAlsoLike")}</em>
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-5" style={{ marginTop: "1.5rem" }}>
             {related.map((item) => (
               <ProductCard key={item.id} product={item} />
             ))}

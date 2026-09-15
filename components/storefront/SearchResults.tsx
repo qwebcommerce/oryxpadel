@@ -7,7 +7,7 @@ import type { Product } from "@/types";
 export default function SearchResults({ q, products }: { q: string; products: Product[] }) {
   const { t } = usePreferences();
   return (
-    <section className="page-section" style={{ maxWidth: 1400 }}>
+    <section className="page-section">
       <span className="section-eyebrow">{t("search")}</span>
       <h1 className="section-title" style={{ marginBottom: "2rem" }}>
         {q ? t("resultsFor", { q }) : t("searchTitle")}

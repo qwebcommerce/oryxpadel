@@ -10,7 +10,10 @@ export const DEFAULT_STORE_SETTINGS: StoreSettings = {
 };
 
 export function formatQar(amount: number): string {
-  return `${theme.commerce.currency} ${Math.round(amount).toLocaleString("en-US")}`;
+  return `${theme.commerce.currency} ${amount.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
 }
 
 export function slugify(value: string): string {

@@ -1,9 +1,9 @@
 import { theme } from "@/theme.config";
 
 const HEIGHTS = {
-  nav: 42,
-  footer: 56,
-  admin: 38,
+  nav: 60,
+  footer: 88,
+  admin: 52,
   splash: 108,
 } as const;
 
@@ -17,11 +17,11 @@ export default function BrandLogo({
   const height = HEIGHTS[size];
   return (
     <img
-      src="/logo.png?v=2"
-      alt={theme.brand.name}
+      src={theme.brand.logoInverse}
+      alt={theme.brand.display}
       height={height}
       className={`brand-logo${className ? ` ${className}` : ""}`}
-      style={{ height, width: "auto", display: "block" }}
+      style={{ height, width: height, objectFit: "contain", display: "block" }}
     />
   );
 }

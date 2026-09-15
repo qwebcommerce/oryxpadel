@@ -77,6 +77,8 @@ export async function listProducts(filters?: ProductFilters): Promise<Product[]>
   if (filters?.sort === "price-asc") query = query.order("price", { ascending: true });
   else if (filters?.sort === "price-desc") query = query.order("price", { ascending: false });
   else if (filters?.sort === "name") query = query.order("name", { ascending: true });
+  else if (filters?.sort === "name-desc") query = query.order("name", { ascending: false });
+  else if (filters?.sort === "oldest") query = query.order("created_at", { ascending: true });
   else query = query.order("created_at", { ascending: false });
   const { data, error } = await query;
   if (error) throw error;
