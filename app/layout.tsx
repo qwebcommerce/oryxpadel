@@ -41,7 +41,7 @@ export default async function RootLayout({
 }>) {
   const store = await cookies();
   const locale = (store.get("qc_locale")?.value === "ar" ? "ar" : defaultLocale) as Locale;
-  const colorTheme = store.get("qc_theme")?.value === "dark" ? "dark" : defaultThemeMode;
+  const colorTheme = defaultThemeMode;
 
   return (
     <html

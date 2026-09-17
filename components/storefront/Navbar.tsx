@@ -7,6 +7,7 @@ import BrandLogo from "@/components/BrandLogo";
 import AccountMenu, { type StoreCustomer } from "@/components/storefront/AccountMenu";
 import CollectionsMenu, { CollectionsPanel } from "@/components/storefront/CollectionsMenu";
 import PrefToggles from "@/components/storefront/PrefToggles";
+import { nestCategories, localizedCategoryName } from "@/lib/categories";
 import { usePreferences } from "@/lib/preferences";
 import { useCart, useUi, useWishlist } from "@/lib/store";
 import { loc, theme } from "@/theme.config";
@@ -25,13 +26,24 @@ export default function Navbar({
   const { setSearchOpen, setCartOpen } = useUi();
   const { t, locale } = usePreferences();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [catsOpen, setCatsOpen] = useState(false);
+  const [openCat, setOpenCat] = useState<string | null>(null);
   const textColor = "var(--black)";
+  const categoryTree = nestCategories(categories);
+
+  useEffect(() => {
+    setMobileOpen(false);
+    setCatsOpen(false);
+    setOpenCat(null);
+  }, [pathname]);
 
   useEffect(() => {
     if (!mobileOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     const onPointer = (event: PointerEvent) => {
       const target = event.target as HTMLElement | null;
-      if (target?.closest(".shop-nav-shell, .header-menu-btn")) return;
+      if (target?.closest(".mobile-drawer, .header-menu-btn")) return;
       setMobileOpen(false);
     };
     const onKey = (event: KeyboardEvent) => {
@@ -40,6 +52,7 @@ export default function Navbar({
     document.addEventListener("pointerdown", onPointer);
     document.addEventListener("keydown", onKey);
     return () => {
+      document.body.style.overflow = previous;
       document.removeEventListener("pointerdown", onPointer);
       document.removeEventListener("keydown", onKey);
     };
@@ -67,8 +80,10 @@ export default function Navbar({
             </NavIcon>
             <button
               type="button"
-              className="header-menu-btn"
+              className={`header-menu-btn${mobileOpen ? " is-open" : ""}`}
               aria-label={t("menu")}
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-nav"
               onClick={() => setMobileOpen((open) => !open)}
             >
               <MenuIcon />
@@ -102,7 +117,7 @@ export default function Navbar({
           </div>
         </div>
 
-        <nav className={`shop-nav shop-nav--menu${mobileOpen ? " is-open" : ""}`} aria-label={t("shop")}>
+        <nav className="shop-nav shop-nav--menu" aria-label={t("shop")}>
           <Link href="/" className={`nav-link${pathname === "/" ? " is-active" : ""}`}>
             {t("home")}
           </Link>
@@ -117,6 +132,86 @@ export default function Navbar({
 
         <CollectionsPanel categories={categories} />
       </div>
+
+      <div
+        className={`mobile-drawer-backdrop${mobileOpen ? " is-open" : ""}`}
+        aria-hidden={!mobileOpen}
+        onClick={() => setMobileOpen(false)}
+      />
+      <aside
+        id="mobile-nav"
+        className={`mobile-drawer${mobileOpen ? " is-open" : ""}`}
+        aria-hidden={!mobileOpen}
+        aria-label={t("menu")}
+      >
+        <div className="mobile-drawer__head">
+          <p>{t("menu")}</p>
+          <button type="button" className="mobile-drawer__close" aria-label={t("close")} onClick={() => setMobileOpen(false)}>
+            <CloseIcon />
+          </button>
+        </div>
+        <nav className="mobile-drawer__nav">
+          <Link href="/" className={pathname === "/" ? "is-active" : ""}>
+            {t("home")}
+          </Link>
+          <div className={`mobile-drawer__drop${catsOpen ? " is-open" : ""}`}>
+            <button
+              type="button"
+              className="mobile-drawer__drop-btn"
+              aria-expanded={catsOpen}
+              onClick={() => setCatsOpen((open) => !open)}
+            >
+              {t("categories")}
+              <ChevronIcon />
+            </button>
+            {catsOpen ? (
+              <div className="mobile-drawer__drop-panel">
+                <Link href="/shop">{t("viewAllProducts")}</Link>
+                {categoryTree.map((category) => {
+                  const label = localizedCategoryName(category, locale);
+                  if (category.children.length === 0) {
+                    return (
+                      <Link key={category.id} href={`/shop/${category.slug}`}>
+                        {label}
+                      </Link>
+                    );
+                  }
+                  const expanded = openCat === category.id;
+                  return (
+                    <div key={category.id} className={`mobile-drawer__sub${expanded ? " is-open" : ""}`}>
+                      <button
+                        type="button"
+                        className="mobile-drawer__sub-btn"
+                        aria-expanded={expanded}
+                        onClick={() => setOpenCat(expanded ? null : category.id)}
+                      >
+                        {label}
+                        <ChevronIcon />
+                      </button>
+                      {expanded ? (
+                        <div className="mobile-drawer__sub-panel">
+                          <Link href={`/shop/${category.slug}`}>{label}</Link>
+                          {category.children.map((child) => (
+                            <Link key={child.id} href={`/shop/${child.slug}`}>
+                              {localizedCategoryName(child, locale)}
+                            </Link>
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : null}
+          </div>
+          <Link href="/contact" className={pathname.startsWith("/contact") ? "is-active" : ""}>
+            {t("navContact")}
+          </Link>
+          <Link href="/faq" className={pathname.startsWith("/faq") ? "is-active" : ""}>
+            {t("navFaq")}
+          </Link>
+        </nav>
+      </aside>
     </header>
   );
 }
@@ -200,6 +295,22 @@ function MenuIcon() {
   return (
     <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
       <path d="M4 7h16M4 12h16M4 17h16" />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
+      <path d="M6 6l12 12M18 6 6 18" />
+    </svg>
+  );
+}
+
+function ChevronIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <path d="M2.4 4.4 6 8l3.6-3.6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

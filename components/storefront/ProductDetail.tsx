@@ -52,15 +52,20 @@ export default function ProductDetail({ product, related }: { product: Product; 
   return (
     <section className="page-section product-page">
       <div className="product-detail">
-        <div>
-          <div className="img-zoom" style={{ background: "var(--surface)", aspectRatio: "1 / 1.25" }}>
-            <img src={image} alt={name} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+        <div className="product-detail__gallery">
+          <div className="product-detail__stage img-zoom">
+            <img src={image} alt={name} />
           </div>
           {gallery.length > 1 && (
-            <div style={{ display: "flex", gap: "0.6rem", marginTop: "0.75rem" }}>
+            <div className="product-detail__thumbs">
               {gallery.map((src) => (
-                <button key={src} onClick={() => setImage(src)} style={{ width: 72, height: 96, padding: 0, border: src === image ? "1px solid var(--gold)" : "1px solid var(--sand)", background: "none" }}>
-                  <img src={src} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <button
+                  key={src}
+                  type="button"
+                  className={`product-detail__thumb${src === image ? " is-active" : ""}`}
+                  onClick={() => setImage(src)}
+                >
+                  <img src={src} alt="" />
                 </button>
               ))}
             </div>

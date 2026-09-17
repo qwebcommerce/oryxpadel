@@ -59,7 +59,7 @@ function persist(next: Snapshot) {
 function read(): Snapshot {
   if (typeof window === "undefined") return memory;
   const locale = localStorage.getItem("qc_locale") === "ar" ? "ar" : "en";
-  const theme = localStorage.getItem("qc_theme") === "dark" ? "dark" : "light";
+  const theme = defaultThemeMode;
   return setMemory({ locale, theme });
 }
 
@@ -68,7 +68,7 @@ function subscribe(listener: () => void) {
   return () => listeners.delete(listener);
 }
 
-export const PREFERENCE_BOOTSTRAP = `(function(){try{var l=localStorage.getItem("qc_locale")||"${defaultLocale}";var t=localStorage.getItem("qc_theme")||"${defaultThemeMode}";var d=document.documentElement;d.lang=l;d.dir=l==="ar"?"rtl":"ltr";d.dataset.theme=t;}catch(e){}})();`;
+export const PREFERENCE_BOOTSTRAP = `(function(){try{var l=localStorage.getItem("qc_locale")||"${defaultLocale}";var t="${defaultThemeMode}";var d=document.documentElement;d.lang=l;d.dir=l==="ar"?"rtl":"ltr";d.dataset.theme=t;try{localStorage.setItem("qc_theme",t);document.cookie="qc_theme="+t+"; path=/; max-age=31536000; samesite=lax";}catch(e2){}}catch(e){}})();`;
 
 export function PreferencesProvider({
   children,
