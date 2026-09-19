@@ -11,6 +11,7 @@ import type {
   Expense,
   ExpenseInput,
   NewsletterEntry,
+  DropshipShipment,
   Order,
   OrderInput,
   OrderStatus,
@@ -95,7 +96,7 @@ export async function updateOrderPaymentStatus(id: string, paymentStatus: Paymen
 
 export async function updateOrder(
   id: string,
-  patch: { status?: OrderStatus; paymentStatus?: PaymentStatus },
+  patch: { status?: OrderStatus; paymentStatus?: PaymentStatus; shipments?: DropshipShipment[] },
 ): Promise<Order> {
   return supabaseStore.updateOrder(id, patch);
 }
