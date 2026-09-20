@@ -36,6 +36,7 @@ ADMIN_EMAIL=admin@oryx.com
 ADMIN_PASSWORD=admin123
 RESEND_API_KEY=re_...
 EMAIL_FROM=Oryx <onboarding@resend.dev>
+EMAIL_ADMIN=admin@oryx.com
 NEXT_PUBLIC_SITE_URL=https://oryxpadel.com
 
 # Optional. Dropshipping stays hidden until the client is ready.
