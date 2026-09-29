@@ -80,6 +80,15 @@ function csv(value: string) {
   return value.split(",").map((v) => v.trim()).filter(Boolean);
 }
 
+function caughtMessage(error: unknown, fallback: string) {
+  if (error instanceof Error && error.message.trim()) return error.message;
+  if (error && typeof error === "object" && "message" in error) {
+    const message = (error as { message: unknown }).message;
+    if (typeof message === "string" && message.trim()) return message;
+  }
+  return fallback;
+}
+
 async function fulfillDropshipShipments(
   order: Order,
   options: { shipmentId?: string } = {},
@@ -177,8 +186,12 @@ export async function updateCustomerProfileAction(formData: FormData) {
 export async function subscribeNewsletterAction(formData: FormData) {
   const email = formString(formData, "email");
   if (!email) return { error: "Email is required" };
-  await addNewsletter(email);
-  return { ok: true };
+  try {
+    await addNewsletter(email);
+    return { ok: true };
+  } catch (error) {
+    return { error: caughtMessage(error, "Could not subscribe right now.") };
+  }
 }
 
 export async function applyPromoAction(code: string, email: string) {
@@ -253,7 +266,13 @@ export async function placeOrderAction(input: {
       promoCode: input.promoCode,
       shippingAddress: { line1, city, country, postalCode, area, phone },
     });
-    const notify = await notifyOrderCreated(order);
+    let emailFailed = false;
+    try {
+      emailFailed = (await notifyOrderCreated(order)).emailFailed;
+    } catch (error) {
+      emailFailed = true;
+      console.error("Order emails failed:", caughtMessage(error, "Email send failed"));
+    }
     revalidatePath("/admin");
     revalidatePath("/account");
     return {
@@ -261,10 +280,10 @@ export async function placeOrderAction(input: {
       orderId: order.id,
       orderNumber: order.orderNumber,
       isGuest: !session,
-      emailFailed: notify.emailFailed,
+      emailFailed,
     };
   } catch (error) {
-    return { error: error instanceof Error ? error.message : "Could not place order" };
+    return { error: caughtMessage(error, "Could not place order") };
   }
 }
 
@@ -407,12 +426,17 @@ export async function updateOrderStatusAction(formData: FormData) {
     const order = await updateOrder(id, { status });
     let emailFailed = false;
     if (previous && shouldSendReadyToShip(previous.status, order.status)) {
-      emailFailed = (await notifyOrderReadyToShip(order)).emailFailed;
+      try {
+        emailFailed = (await notifyOrderReadyToShip(order)).emailFailed;
+      } catch (error) {
+        emailFailed = true;
+        console.error("Ready-to-ship email failed:", caughtMessage(error, "Email send failed"));
+      }
     }
     revalidateOrderPaths(id);
     return { ok: true as const, emailFailed };
   } catch (error) {
-    return { error: error instanceof Error ? error.message : "Could not update order." };
+    return { error: caughtMessage(error, "Could not update order.") };
   }
 }
 

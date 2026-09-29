@@ -31,10 +31,18 @@ const EMPTY_DASHBOARD: DashboardStats = {
   lowStock: 0,
 };
 
+function readErrorMessage(error: unknown) {
+  if (error instanceof Error && error.message.trim()) return error.message;
+  if (error && typeof error === "object" && "message" in error) {
+    const message = (error as { message: unknown }).message;
+    if (typeof message === "string" && message.trim()) return message;
+  }
+  return String(error);
+}
+
 function emptyOnMissingTable<T>(fallback: T) {
   return (error: unknown): T => {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error("Supabase read failed:", message);
+    console.error("Supabase read failed:", readErrorMessage(error));
     return fallback;
   };
 }

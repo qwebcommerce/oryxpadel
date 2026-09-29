@@ -14,12 +14,17 @@ export async function notifyOrderCreated(order: Order) {
   const customer = order.email.trim();
   const admin = adminNotifyEmail();
   let emailFailed = false;
-  try {
-    const sent = await sendStoreEmail({ to: customer, ...renderOrderEmail(order, "created") });
-    if (emailDidFail(sent)) emailFailed = true;
-  } catch (error) {
+  if (!customer) {
+    console.error("Order confirmation email failed: missing customer email");
     emailFailed = true;
-    console.error("Order confirmation email failed:", error);
+  } else {
+    try {
+      const sent = await sendStoreEmail({ to: customer, ...renderOrderEmail(order, "created") });
+      if (emailDidFail(sent)) emailFailed = true;
+    } catch (error) {
+      emailFailed = true;
+      console.error("Order confirmation email failed:", error);
+    }
   }
   if (admin && admin !== customer.toLowerCase()) {
     try {
@@ -29,6 +34,8 @@ export async function notifyOrderCreated(order: Order) {
       emailFailed = true;
       console.error("Admin new-order email failed:", error);
     }
+  } else if (!admin) {
+    console.warn("Admin order email skipped: set EMAIL_ADMIN or ADMIN_EMAIL.");
   }
   return { emailFailed };
 }

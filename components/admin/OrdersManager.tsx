@@ -65,7 +65,7 @@ export default function OrdersManager({ orders }: { orders: Order[] }) {
 
   function run(
     id: string,
-    action: (form: FormData) => Promise<{ ok?: true; error?: string }>,
+    action: (form: FormData) => Promise<{ ok?: true; error?: string; emailFailed?: boolean }>,
     form: FormData,
     success: string,
   ) {
@@ -78,6 +78,7 @@ export default function OrdersManager({ orders }: { orders: Order[] }) {
         return;
       }
       toast.success(success);
+      if (result.emailFailed) toast.error(t("orderEmailFailed"), t("adminEmailFailedBody"));
       router.refresh();
     });
   }
