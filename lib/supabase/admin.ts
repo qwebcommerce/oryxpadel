@@ -16,11 +16,13 @@ export function createAdminSupabase() {
           const value = incoming.get(name);
           if (value) headers.set(name, value);
         }
+        const timeout = AbortSignal.timeout(8000);
         return fetch(input, {
           method: init?.method,
           body: init?.body,
           headers,
           cache: "no-store",
+          signal: init?.signal ? AbortSignal.any([init.signal, timeout]) : timeout,
         });
       },
     },
