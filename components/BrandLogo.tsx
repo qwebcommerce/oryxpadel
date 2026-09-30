@@ -19,7 +19,7 @@ export default function BrandLogo({
   const height = HEIGHTS[size];
   return (
     <img
-      src={onDark ? theme.brand.logo : theme.brand.logoInverse}
+      src={onDark ? "/logo-mark.png?v=2" : theme.brand.logoInverse}
       alt={theme.brand.display}
       height={height}
       className={`brand-logo${onDark ? " brand-logo--on-dark" : ""}${className ? ` ${className}` : ""}`}

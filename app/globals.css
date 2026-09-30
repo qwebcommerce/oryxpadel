@@ -2255,7 +2255,8 @@ html[lang="ar"] .pref-toggle--theme .pref-toggle__opt { letter-spacing: 0; }
   color-scheme: dark;
 }
 .admin-sidebar .brand-logo--on-dark {
-  filter: invert(1);
+  background: transparent;
+  filter: brightness(0) invert(1);
 }
 .admin-sidebar__head {
   display: flex;
