@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 export type AdminSelectOption = { value: string; label: string };
@@ -13,6 +13,7 @@ export default function AdminSelect({
   className,
   id,
   "aria-label": ariaLabel,
+  preferUp,
 }: {
   value: string;
   options: AdminSelectOption[];
@@ -21,6 +22,7 @@ export default function AdminSelect({
   className?: string;
   id?: string;
   "aria-label"?: string;
+  preferUp?: boolean;
 }) {
   const generatedId = useId();
   const menuId = id ? `${id}-menu` : generatedId;
@@ -40,24 +42,33 @@ export default function AdminSelect({
     if (!node) return;
     const rect = node.getBoundingClientRect();
     const width = Math.max(rect.width, 168);
-    const spaceBelow = window.innerHeight - rect.bottom;
-    const spaceAbove = rect.top;
-    const openUp = spaceBelow < 140 && spaceAbove > spaceBelow;
-    const maxHeight = Math.max(120, Math.min(256, (openUp ? spaceAbove : spaceBelow) - 12));
+    const gap = 4;
+    const spaceBelow = window.innerHeight - rect.bottom - 8;
+    const spaceAbove = rect.top - 8;
+    const isTabletOrSmaller = window.matchMedia("(max-width: 1024px)").matches;
+    const openUp =
+      preferUp && isTabletOrSmaller && spaceAbove >= 96
+        ? true
+        : spaceBelow < 140 && spaceAbove > spaceBelow;
+    const maxHeight = Math.max(96, Math.min(256, openUp ? spaceAbove : spaceBelow));
     let left = rect.left;
     if (left + width > window.innerWidth - 8) left = window.innerWidth - width - 8;
     if (left < 8) left = 8;
     setPos({
-      top: openUp ? Math.max(8, rect.top - maxHeight - 6) : rect.bottom + 6,
+      top: openUp ? Math.max(8, rect.top - maxHeight - gap) : rect.bottom + gap,
       left,
       width,
       maxHeight,
     });
   }
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!open) return;
     place();
+  }, [open, options.length]);
+
+  useEffect(() => {
+    if (!open) return;
     const onPointer = (event: PointerEvent) => {
       const target = event.target as Node;
       if (buttonRef.current?.contains(target) || menuRef.current?.contains(target)) return;
@@ -80,7 +91,7 @@ export default function AdminSelect({
   }, [open, options.length]);
 
   return (
-    <>
+    <div className={`admin-select-wrap${open ? " is-open" : ""}`}>
       <button
         ref={buttonRef}
         id={id}
@@ -93,10 +104,7 @@ export default function AdminSelect({
         aria-controls={open ? menuId : undefined}
         onClick={() => {
           if (disabled) return;
-          setOpen((current) => {
-            if (!current) place();
-            return !current;
-          });
+          setOpen((current) => !current);
         }}
       >
         <span>{selected?.label ?? ""}</span>
@@ -131,7 +139,7 @@ export default function AdminSelect({
             document.body,
           )
         : null}
-    </>
+    </div>
   );
 }
 
