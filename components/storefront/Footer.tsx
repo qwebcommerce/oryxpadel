@@ -29,14 +29,6 @@ export default function Footer() {
           <div className="footer-col">
             <p>{t("customerCare")}</p>
           </div>
-          <div className="footer-col">
-            <p>{t("information")}</p>
-            <ul>
-              <li>
-                <Link href="/admin" className="footer-link">{t("admin")}</Link>
-              </li>
-            </ul>
-          </div>
         </div>
       </div>
       <div className="footer-utils">

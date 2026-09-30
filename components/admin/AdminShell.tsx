@@ -74,7 +74,7 @@ export default function AdminShell({
         >
           <div className="admin-sidebar__head">
             <Link href="/admin" className="admin-brand" onClick={() => setMenuOpen(false)}>
-              <BrandLogo size="admin" />
+              <BrandLogo size="admin" onDark />
             </Link>
             <div className="admin-identity">
               <span className="admin-identity__avatar" aria-hidden="true">
