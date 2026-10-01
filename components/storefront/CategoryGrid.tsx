@@ -20,6 +20,7 @@ export default function CategoryGrid({ categories }: { categories: Category[] })
     subtitle: "",
     subtitleAr: "",
     sortOrder: index,
+    createdAt: "",
   }))).slice(0, 4).map((cat, index) => {
     const preset = fallbacks.find((item) => item.slug === cat.slug) ?? fallbacks[index];
     return {
