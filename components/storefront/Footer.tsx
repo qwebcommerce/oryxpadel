@@ -35,6 +35,12 @@ export default function Footer() {
         <p suppressHydrationWarning>© {year} {theme.brand.display}</p>
         <Link href="/terms" className="footer-legal-link">{t("termsAndPolicies")}</Link>
       </div>
+      <p className="footer-credit">
+        {t("broughtToLifeBy")}{" "}
+        <a href="https://qwebdigital.com/" target="_blank" rel="noopener noreferrer">
+          Qweb Digital
+        </a>
+      </p>
     </footer>
   );
 }
