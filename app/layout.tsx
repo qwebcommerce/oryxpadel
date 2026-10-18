@@ -1,28 +1,39 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { IBM_Plex_Sans_Arabic, Newsreader, Red_Hat_Display } from "next/font/google";
+import localFont from "next/font/local";
 import { PreferencesProvider, PREFERENCE_BOOTSTRAP } from "@/lib/preferences";
 import { ToastProvider } from "@/lib/toast";
 import { defaultLocale, defaultThemeMode, theme, themeCss, type Locale } from "@/theme.config";
 import "./globals.css";
 
-const newsreader = Newsreader({
+const newsreader = localFont({
+  src: [
+    { path: "./fonts/newsreader-latin-wght-normal.woff2", weight: "200 800", style: "normal" },
+    { path: "./fonts/newsreader-latin-wght-italic.woff2", weight: "200 800", style: "italic" },
+  ],
   variable: "--font-body",
-  subsets: ["latin"],
-  style: ["normal", "italic"],
-  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
 });
 
-const redHat = Red_Hat_Display({
+const redHat = localFont({
+  src: [
+    { path: "./fonts/red-hat-display-latin-500-normal.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/red-hat-display-latin-600-normal.woff2", weight: "600", style: "normal" },
+    { path: "./fonts/red-hat-display-latin-700-normal.woff2", weight: "700", style: "normal" },
+  ],
   variable: "--font-accent",
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
+  display: "swap",
 });
 
-const arabic = IBM_Plex_Sans_Arabic({
+const arabic = localFont({
+  src: [
+    { path: "./fonts/ibm-plex-sans-arabic-arabic-400-normal.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/ibm-plex-sans-arabic-arabic-500-normal.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/ibm-plex-sans-arabic-arabic-600-normal.woff2", weight: "600", style: "normal" },
+    { path: "./fonts/ibm-plex-sans-arabic-arabic-700-normal.woff2", weight: "700", style: "normal" },
+  ],
   variable: "--font-arabic",
-  subsets: ["arabic"],
-  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
